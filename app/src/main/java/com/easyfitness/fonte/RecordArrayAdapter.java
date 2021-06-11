@@ -2,6 +2,7 @@ package com.easyfitness.fonte;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -317,32 +318,43 @@ public class RecordArrayAdapter extends ArrayAdapter {
             viewHolder.BtActionSuccess.setOnClickListener(v -> {
                 if (mDisplayType == DisplayType.PROGRAM_RUNNING_DISPLAY) {
                     if (record.getProgramRecordStatus() != ProgramRecordStatus.SUCCESS) {
-                        record.setSets(templateRecord.getSets());
-                        record.setReps(templateRecord.getReps());
-                        record.setWeight(templateRecord.getWeight());
-                        record.setWeightUnit(templateRecord.getWeightUnit());
-                        record.setSeconds(templateRecord.getSeconds());
-                        record.setDistance(templateRecord.getDistance());
-                        record.setDistanceUnit(templateRecord.getDistanceUnit());
-                        record.setDuration(templateRecord.getDuration());
-                        record.setProgramRecordStatus(ProgramRecordStatus.SUCCESS);
-                        record.setDate(DateConverter.getNewDate());
-                        mDbRecord.updateRecord(record);
-                        UpdateRecordTypeUI(record, viewHolder);
-                        UpdateValues(record, position, viewHolder);
-                        launchCountdown(record);
-                        notifyDataSetChanged();
-                        boolean programComplete = true;
-                        for (Record rec : mRecordList) {
-                            if (rec.getProgramRecordStatus() != ProgramRecordStatus.FAILED && rec.getProgramRecordStatus() != ProgramRecordStatus.SUCCESS) {
-                                programComplete = false;
-                                break;
-                            }
-                        }
-                        if (programComplete) {
-                            if (mProgramCompletedListener != null)
-                                mProgramCompletedListener.onEvent("");
-                        }
+                        // TODO: Remove hardcoded strings
+                        showEditorDialog(record, position, viewHolder, "Enter result", dialog -> {
+                            showEditorDialog(templateRecord, position, viewHolder, "Change Template", dialog1 -> {
+                                // TODO: Is this still needed? To me it looks like the current
+                                //       record is being overwritten with the template values 
+                                //       before saving.
+                                /*
+                                record.setSets(templateRecord.getSets());
+                                record.setReps(templateRecord.getReps());
+                                record.setWeight(templateRecord.getWeight());
+                                record.setWeightUnit(templateRecord.getWeightUnit());
+                                record.setSeconds(templateRecord.getSeconds());
+                                record.setDistance(templateRecord.getDistance());
+                                record.setDistanceUnit(templateRecord.getDistanceUnit());
+                                record.setDuration(templateRecord.getDuration());
+                                */
+                                record.setProgramRecordStatus(ProgramRecordStatus.SUCCESS);
+                                record.setDate(DateConverter.getNewDate());
+                                mDbRecord.updateRecord(record);
+
+                                UpdateRecordTypeUI(record, viewHolder);
+                                UpdateValues(record, position, viewHolder);
+                                launchCountdown(record);
+                                notifyDataSetChanged();
+                                boolean programComplete = true;
+                                for (Record rec : mRecordList) {
+                                    if (rec.getProgramRecordStatus() != ProgramRecordStatus.FAILED && rec.getProgramRecordStatus() != ProgramRecordStatus.SUCCESS) {
+                                        programComplete = false;
+                                        break;
+                                    }
+                                }
+                                if (programComplete) {
+                                    if (mProgramCompletedListener != null)
+                                        mProgramCompletedListener.onEvent("");
+                                }
+                            });
+                        });
                     } else {
                         record.setProgramRecordStatus(ProgramRecordStatus.PENDING);
                         mDbRecord.updateRecord(record);
@@ -399,7 +411,19 @@ public class RecordArrayAdapter extends ArrayAdapter {
     }
 
     private void showEditorDialog(Record record, int position, ViewHolder viewHolder) {
+        showEditorDialog(record, position, viewHolder, null,  null);
+    }
+
+    private void showEditorDialog(Record record, int position, ViewHolder viewHolder, String title) {
+        showEditorDialog(record, position, viewHolder, title, null);
+    }
+
+    private void showEditorDialog(Record record, int position, ViewHolder viewHolder, String title, DialogInterface.OnDismissListener listener) {
         RecordEditorDialogbox recordEditorDialogbox = new RecordEditorDialogbox(mActivity, record, mDisplayType == DisplayType.PROGRAM_EDIT_DISPLAY);
+
+        if(title != null)
+            recordEditorDialogbox.setTitle(title);
+
         recordEditorDialogbox.setOnCancelListener(dialog -> {
             if (mDisplayType == DisplayType.PROGRAM_RUNNING_DISPLAY) {
                 record.setProgramRecordStatus(ProgramRecordStatus.PENDING);
@@ -414,6 +438,8 @@ public class RecordArrayAdapter extends ArrayAdapter {
             if (!recordEditorDialogbox.isCancelled()) {
                 notifyDataSetChanged();
                 Keyboard.hide(getContext(), viewHolder.CardView);
+                if(listener != null)
+                    listener.onDismiss(dialog);
             }
         });
         recordEditorDialogbox.show();

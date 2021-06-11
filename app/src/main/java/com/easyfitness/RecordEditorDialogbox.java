@@ -5,6 +5,9 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.easyfitness.DAO.record.DAORecord;
 import com.easyfitness.DAO.record.Record;
@@ -20,7 +23,9 @@ public class RecordEditorDialogbox extends Dialog implements View.OnClickListene
     private final Record mRecord;
     public Dialog d;
     private WorkoutValuesInputView mWorkoutValuesInput;
+    private TextView mWorkoutValuesTitle;
     private boolean mCancelled = false;
+    private CharSequence mTitle = null;
 
     public RecordEditorDialogbox(Activity a, Record record) {
         super(a);
@@ -45,9 +50,12 @@ public class RecordEditorDialogbox extends Dialog implements View.OnClickListene
         Button updateButton = findViewById(R.id.btn_update);
         Button cancelButton = findViewById(R.id.btn_cancel);
         mWorkoutValuesInput = findViewById(R.id.EditorWorkoutValuesInput);
+        mWorkoutValuesTitle = findViewById(R.id.EditorWorkoutTitle);
+
+        if(mTitle != null)
+            mWorkoutValuesTitle.setText(mTitle);
 
         mWorkoutValuesInput.setRecord(mRecord);
-
         mWorkoutValuesInput.setShowRestTime(mShowRestTime);
 
         updateButton.setOnClickListener(this);
@@ -107,4 +115,8 @@ public class RecordEditorDialogbox extends Dialog implements View.OnClickListene
         return mCancelled;
     }
 
+    @Override
+    public void setTitle(@Nullable CharSequence title) {
+        mTitle = title;
+    }
 }

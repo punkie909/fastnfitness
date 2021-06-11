@@ -55,6 +55,7 @@ public class RecordArrayAdapter extends ArrayAdapter {
     private final Context mContext;
     private final DisplayType mDisplayType;
     private final DAORecord mDbRecord;
+    private final DAOMachine mDbMachine;
     List<Record> mRecordList;
     private LayoutInflater mInflater;
     private BtnClickListener mAction2ClickListener = null;
@@ -69,6 +70,7 @@ public class RecordArrayAdapter extends ArrayAdapter {
         mRecordList = objects;
         mAction2ClickListener = clickAction2;
         mDbRecord = new DAORecord(context);
+        mDbMachine = new DAOMachine(context);
         mDbWorkout = new DAOProgram(context);
     }
 
@@ -86,6 +88,7 @@ public class RecordArrayAdapter extends ArrayAdapter {
 
             viewHolder = new ViewHolder();
             viewHolder.ExerciseName = view.findViewById(R.id.MACHINE_CELL);
+            viewHolder.ExerciseDescription = view.findViewById(R.id.MACHINE_DESCRIPTION);
             viewHolder.CardView = view.findViewById(R.id.CARDVIEW);
 
             viewHolder.Separator = view.findViewById(R.id.SEPARATOR_CELL);
@@ -147,6 +150,8 @@ public class RecordArrayAdapter extends ArrayAdapter {
 
         viewHolder.BtActionEdit.setTag(record.getId());
         viewHolder.BtActionEdit.setOnClickListener(v -> showEditorDialog(record, position, viewHolder));
+
+        viewHolder.ExerciseDescription.setVisibility(mDisplayType == DisplayType.PROGRAM_RUNNING_DISPLAY || mDisplayType == DisplayType.PROGRAM_PREVIEW_DISPLAY ? View.VISIBLE : View.GONE);
 
         if (record.getProgramRecordStatus() == ProgramRecordStatus.PENDING) {
             viewHolder.FirstColValue.setText("-");
@@ -262,6 +267,10 @@ public class RecordArrayAdapter extends ArrayAdapter {
             });
         } else if (mDisplayType == DisplayType.PROGRAM_RUNNING_DISPLAY || mDisplayType == DisplayType.PROGRAM_PREVIEW_DISPLAY) {
             viewHolder.ExerciseName.setText(record.getExercise());
+
+            Machine machine = mDbMachine.getMachine(record.getExerciseId());
+
+            viewHolder.ExerciseDescription.setText(machine.getDescription());
             viewHolder.Separator.setVisibility(View.GONE);
 
             if (record.getRestTime() != 0) {
@@ -590,6 +599,7 @@ public class RecordArrayAdapter extends ArrayAdapter {
         CardView CardView;
         TextView Separator;
         TextView ExerciseName;
+        TextView ExerciseDescription;
         TextView Date;
         TextView Time;
         TextView FirstColValue;

@@ -75,6 +75,17 @@
                         app:autoSizeTextType="uniform"
                         tool:text="Machine dddsfdfsdfsdfsdfdddsfdfsdfsdfsdf" />
 
+                    <TextView
+                        android:id="@+id/MACHINE_DESCRIPTION"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+
+                        android:ellipsize="end"
+                        android:gravity="center_vertical"
+                        android:singleLine="true"
+                        android:textSize="10sp"
+                        tool:text="Machine dddsfdfsdfsdfsdfdddsfdfsdfsdfsdf" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
